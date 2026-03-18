@@ -1,0 +1,197 @@
+import java.util.*;
+import java.io.*;
+
+class Voter {
+    String username;
+    String password;
+    boolean hasVoted;
+
+    Voter(String username, String password, boolean hasVoted) {
+        this.username = username;
+        this.password = password;
+        this.hasVoted = hasVoted;
+    }
+}
+
+public class OnlineVotingSystem {
+
+    static Scanner sc = new Scanner(System.in);
+    static ArrayList<Voter> voters = new ArrayList<>();
+
+    static int candidate1Votes = 0;
+    static int candidate2Votes = 0;
+    static int candidate3Votes = 0;
+
+    static final String VOTER_FILE = "voters.txt";
+    static final String VOTE_FILE = "votes.txt";
+
+    public static void loadData() {
+        try {
+            File file = new File(VOTER_FILE);
+            if (file.exists()) {
+                Scanner fileReader = new Scanner(file);
+                while (fileReader.hasNextLine()) {
+                    String[] data = fileReader.nextLine().split(",");
+                    voters.add(new Voter(data[0], data[1], Boolean.parseBoolean(data[2])));
+                }
+                fileReader.close();
+            }
+
+            File voteFile = new File(VOTE_FILE);
+            if (voteFile.exists()) {
+                Scanner voteReader = new Scanner(voteFile);
+                candidate1Votes = voteReader.nextInt();
+                candidate2Votes = voteReader.nextInt();
+                candidate3Votes = voteReader.nextInt();
+                voteReader.close();
+            }
+        } catch (Exception e) {
+            System.out.println("Error loading data");
+        }
+    }
+
+    public static void saveVoters() {
+        try {
+            FileWriter writer = new FileWriter(VOTER_FILE);
+            for (Voter v : voters) {
+                writer.write(v.username + "," + v.password + "," + v.hasVoted + "\n");
+            }
+            writer.close();
+        } catch (Exception e) {
+            System.out.println("Error saving voters");
+        }
+    }
+
+    public static void saveVotes() {
+        try {
+            FileWriter writer = new FileWriter(VOTE_FILE);
+            writer.write(candidate1Votes + " " + candidate2Votes + " " + candidate3Votes);
+            writer.close();
+        } catch (Exception e) {
+            System.out.println("Error saving votes");
+        }
+    }
+
+    public static void register() {
+        System.out.print("Enter username: ");
+        String user = sc.next();
+
+        System.out.print("Enter password: ");
+        String pass = sc.next();
+
+        voters.add(new Voter(user, pass, false));
+        saveVoters();
+
+        System.out.println("Registration successful\n");
+    }
+
+    public static Voter login() {
+        System.out.print("Enter username: ");
+        String user = sc.next();
+
+        System.out.print("Enter password: ");
+        String pass = sc.next();
+
+        for (Voter v : voters) {
+            if (v.username.equals(user) && v.password.equals(pass)) {
+                System.out.println("Login successful\n");
+                return v;
+            }
+        }
+
+        System.out.println("Invalid credentials\n");
+        return null;
+    }
+
+    public static void vote(Voter voter) {
+        if (voter.hasVoted) {
+            System.out.println("You have already voted\n");
+            return;
+        }
+
+        System.out.println("===== Candidates =====");
+        System.out.println("1. Candidate A");
+        System.out.println("2. Candidate B");
+        System.out.println("3. Candidate C");
+
+        System.out.print("Enter your vote (1-3): ");
+        int choice = sc.nextInt();
+
+        switch (choice) {
+            case 1:
+                candidate1Votes++;
+                break;
+            case 2:
+                candidate2Votes++;
+                break;
+            case 3:
+                candidate3Votes++;
+                break;
+            default:
+                System.out.println("Invalid choice");
+                return;
+        }
+
+        voter.hasVoted = true;
+        saveVoters();
+        saveVotes();
+
+        System.out.println("Vote cast successfully\n");
+    }
+
+    public static void showResults() {
+        System.out.println("\n===== Results =====");
+        System.out.println("Candidate A: " + candidate1Votes);
+        System.out.println("Candidate B: " + candidate2Votes);
+        System.out.println("Candidate C: " + candidate3Votes);
+
+        if (candidate1Votes > candidate2Votes && candidate1Votes > candidate3Votes)
+            System.out.println("Winner: Candidate A");
+        else if (candidate2Votes > candidate1Votes && candidate2Votes > candidate3Votes)
+            System.out.println("Winner: Candidate B");
+        else if (candidate3Votes > candidate1Votes && candidate3Votes > candidate2Votes)
+            System.out.println("Winner: Candidate C");
+        else
+            System.out.println("It's a tie");
+    }
+
+    public static void main(String[] args) {
+
+        loadData();
+
+        while (true) {
+            System.out.println("===== Online Voting System =====");
+            System.out.println("1. Register");
+            System.out.println("2. Login & Vote");
+            System.out.println("3. View Results");
+            System.out.println("4. Exit");
+
+            System.out.print("Enter choice: ");
+            int choice = sc.nextInt();
+
+            switch (choice) {
+                case 1:
+                    register();
+                    break;
+
+                case 2:
+                    Voter voter = login();
+                    if (voter != null) {
+                        vote(voter);
+                    }
+                    break;
+
+                case 3:
+                    showResults();
+                    break;
+
+                case 4:
+                    System.out.println("Exiting...");
+                    return;
+
+                default:
+                    System.out.println("Invalid choice\n");
+            }
+        }
+    }
+}
