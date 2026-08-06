@@ -1,0 +1,38 @@
+public class ReverseArray {
+
+    // Function to reverse the array
+    static void reverse(int[] arr) {
+        int left = 0;
+        int right = arr.length - 1;
+
+        while (left < right) {
+            // Swap elements
+            int temp = arr[left];
+            arr[left] = arr[right];
+            arr[right] = temp;
+
+            left++;
+            right--;
+        }
+    }
+
+    // Function to print the array
+    static void printArray(int[] arr) {
+        for (int num : arr) {
+            System.out.print(num + " ");
+        }
+    }
+
+    public static void main(String[] args) {
+
+        int[] arr = {10, 20, 30, 40, 50};
+
+        System.out.println("Original Array:");
+        printArray(arr);
+
+        reverse(arr);
+
+        System.out.println("\nReversed Array:");
+        printArray(arr);
+    }
+}
